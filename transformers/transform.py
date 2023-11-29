@@ -12,6 +12,19 @@ class BaseTransform(ABC):
 
 class MoviesTransform(BaseTransform):
 
+    def _get_persons_names_by_role(self, persons: list[dict], role: str) -> list[str]:  # noqa
+        return [
+            act["person_name"]
+            for act in persons
+            if act["person_role"] == role
+        ]
+
+    def get_persons_by_role(self, persons: list[dict], role: str) -> list[dict]:  # noqa
+        return [
+            {'id': act["person_id"], 'name': act["person_name"]}
+            for act in persons if act["person_role"] == role
+        ]
+
     def transform(self, data: list[dict]) -> list[dict]:
         transformed_data = []
         for row in data:
@@ -28,33 +41,19 @@ class MoviesTransform(BaseTransform):
                     "title": row["title"],
                     "description": row["description"],
                     "director": ",".join(
-                        [
-                            act["person_name"]
-                            for act in row["persons"]
-                            if act["person_role"] == "director"
-                        ]
+                        self._get_persons_names_by_role(row['persons'], 'director')
                     ),
                     "actors_names": ",".join(
-                        [
-                            act["person_name"]
-                            for act in row["persons"]
-                            if act["person_role"] == "actor"
-                        ]
+                        self._get_persons_names_by_role(row['persons'], 'actor')
                     ),
                     "writers_names": [
-                        act["person_name"]
-                        for act in row["persons"]
-                        if act["person_role"] == "writer"
+                        self._get_persons_names_by_role(row['persons'], 'writer')
                     ],
                     "actors": [
-                        dict(id=act["person_id"], name=act["person_name"])
-                        for act in row["persons"]
-                        if act["person_role"] == "actor"
+                        self.get_persons_by_role(row['persons'], 'actor')
                     ],
                     "writers": [
-                        dict(id=act["person_id"], name=act["person_name"])
-                        for act in row["persons"]
-                        if act["person_role"] == "writer"
+                        self.get_persons_by_role(row['persons'], 'writer')
                     ],
                 }
             )

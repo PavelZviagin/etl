@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch, helpers
 
 class ElasticClient:
 
-    def __init__(self, connection_string):
+    def __init__(self, connection_string: str):
         self.connection_string = connection_string
         self.client = None
 
@@ -20,7 +20,7 @@ class ElasticClient:
         self.client.close()
 
     @backoff.on_exception(backoff.expo, elastic_transport.ConnectionError)
-    def create_index(self, index_name, index_body):
+    def create_index(self, index_name: str, index_body: dict):
         if not self.client.indices.exists(index=index_name):
             self.client.indices.create(index=index_name, body=index_body)
 

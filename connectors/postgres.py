@@ -33,7 +33,7 @@ class PostgresClient:
         self.state.set_state(f"last_date_{prefix}", row["updated_at"].isoformat())
 
     @backoff.on_exception(backoff.expo, psycopg2.OperationalError, max_tries=5)
-    def get_data(self, schema) -> list[dict]:
+    def get_data(self, schema: dict) -> list[dict]:
         sql: str = schema['sql_query']
         prefix = schema['index_name']
 

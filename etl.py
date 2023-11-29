@@ -31,19 +31,19 @@ schemas = [
 
 
 def etl(pg_client: PostgresClient, elastic_client: ElasticClient, schema: dict) -> None:
+    transformer = TransformFactory.get_transformer(schema['index_name'])
     for data in pg_client.get_data(schema):
-        transformer = TransformFactory.get_transformer(schema['index_name'])
         transformed_data = transformer.transform(data)
         elastic_client.load_data(transformed_data)
         logger.info(f"Loaded {len(transformed_data)} rows to index {schema['index_name']}")
 
 
-def load_json(index_body_path):
+def load_json(index_body_path: str) -> dict:
     with open(index_body_path, 'r') as f:
         return json.load(f)
 
 
-def load_data(state):
+def load_data(state: State) -> None:
     with (ElasticClient(settings.elastic_connection_string) as elastic_client, PostgresClient(settings.dsl, state) as pg_client):
         for schema in schemas:
             elastic_client.create_index(
